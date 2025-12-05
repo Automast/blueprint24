@@ -1002,9 +1002,10 @@
 
         // --- PAYMENT LOGIC ---
         let publicKey = null;
+        const BACKEND_URL = 'https://blueprint24-production.up.railway.app';
 
         // Fetch Public Key on Load
-        fetch('/api/config')
+        fetch(`${BACKEND_URL}/api/config`)
             .then(res => res.json())
             .then(data => {
                 publicKey = data.key;
@@ -1048,7 +1049,7 @@
                     // Payment Complete! Verify on backend
                     btn.innerText = "Verifying...";
 
-                    fetch('/api/verify', {
+                    fetch(`${BACKEND_URL}/api/verify`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
