@@ -90,6 +90,43 @@ _Please check your dashboard._
     }
 });
 
+// 3. Endpoint for Contact Form
+app.post('/api/contact', async (req, res) => {
+    const { name, email, message } = req.body;
+
+    if (!name || !email || !message) {
+        return res.status(400).json({ status: false, message: 'All fields are required' });
+    }
+
+    // Send Telegram Notification
+    const telegramToken = process.env.TELEGRAM_BOT_TOKEN;
+    const chatId = process.env.TELEGRAM_CHAT_ID;
+
+    // Construct the message
+    const tgMessage = `
+📩 *NEW CONTACT INQUIRY*
+
+👤 *Name:* ${name}
+📧 *Email:* ${email}
+
+📝 *Message:*
+${message}
+    `.trim();
+
+    try {
+        await axios.post(`https://api.telegram.org/bot${telegramToken}/sendMessage`, {
+            chat_id: chatId,
+            text: tgMessage,
+            parse_mode: 'Markdown'
+        });
+        console.log('Contact form notification sent to Telegram');
+        return res.json({ status: true, message: 'Message sent successfully' });
+    } catch (tgError) {
+        console.error('Telegram notification failed:', tgError.response ? tgError.response.data : tgError.message);
+        return res.status(500).json({ status: false, message: 'Failed to send message. Please try again later.' });
+    }
+});
+
 // 3. Fallback route for index.html
 app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, '../index.html'));
